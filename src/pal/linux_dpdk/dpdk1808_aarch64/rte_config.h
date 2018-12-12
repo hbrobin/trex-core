@@ -387,7 +387,10 @@
 #undef RTE_MBUF_REFCNT_ATOMIC
 #define RTE_MBUF_REFCNT_ATOMIC 1
 #undef RTE_PKTMBUF_HEADROOM
-#define RTE_PKTMBUF_HEADROOM 256
+// TREX_PATCH: DPDK original value is 128 here. This creates big overhead of memory.
+// We would like to put 0, but it cuases compilation issues with virtio driver.
+// 16 caused big performance degradation because of alignment issues. So 64 is the winner.
+#define RTE_PKTMBUF_HEADROOM 64
 #undef RTE_LIBRTE_TIMER
 #define RTE_LIBRTE_TIMER 1
 #undef RTE_LIBRTE_TIMER_DEBUG
@@ -462,11 +465,11 @@
 #define RTE_LIBRTE_PIPELINE 1
 #undef RTE_PIPELINE_STATS_COLLECT
 #undef RTE_LIBRTE_KNI
-//#define RTE_LIBRTE_KNI 1
+#define RTE_LIBRTE_KNI 1
 #undef RTE_LIBRTE_PMD_KNI
-//#define RTE_LIBRTE_PMD_KNI 1
+#define RTE_LIBRTE_PMD_KNI 1
 #undef RTE_KNI_KMOD
-//#define RTE_KNI_KMOD 1
+#define RTE_KNI_KMOD 1
 #undef RTE_KNI_KMOD_ETHTOOL
 #undef RTE_KNI_PREEMPT_DEFAULT
 #define RTE_KNI_PREEMPT_DEFAULT 1
@@ -475,7 +478,7 @@
 #undef RTE_LIBRTE_VHOST
 #define RTE_LIBRTE_VHOST 1
 #undef RTE_LIBRTE_VHOST_NUMA
-//#define RTE_LIBRTE_VHOST_NUMA 1
+#define RTE_LIBRTE_VHOST_NUMA 1
 #undef RTE_LIBRTE_VHOST_DEBUG
 #undef RTE_LIBRTE_PMD_VHOST
 #define RTE_LIBRTE_PMD_VHOST 1
@@ -495,8 +498,8 @@
 #undef RTE_TEST_PMD_RECORD_BURST_STATS
 #undef RTE_TEST_BBDEV
 #define RTE_TEST_BBDEV 1
-#undef RTE_APP_CRYPTO_PERF
-#define RTE_APP_CRYPTO_PERF 1
+//#undef RTE_APP_CRYPTO_PERF
+//#define RTE_APP_CRYPTO_PERF 1
 #undef RTE_APP_EVENTDEV
 #define RTE_APP_EVENTDEV 1
 #undef RTE_EXEC_ENV_LINUXAPP
@@ -509,4 +512,7 @@
 #define RTE_TOOLCHAIN_GCC 1
 #undef RTE_ARCH_ARM_TUNE
 #define RTE_ARCH_ARM_TUNE "cortex-a72"
+/* TREX specific */
+#define TREX_PATCH 1
+#define TREX_PATCH_LOW_LATENCY 1
 #endif /* __RTE_CONFIG_H */
