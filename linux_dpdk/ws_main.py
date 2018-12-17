@@ -119,7 +119,7 @@ def options(opt):
     opt.add_option('--pkg-dir', '--pkg_dir', dest='pkg_dir', default=False, action='store', help="Destination folder for 'pkg' option.")
     opt.add_option('--pkg-file', '--pkg_file', dest='pkg_file', default=False, action='store', help="Destination filename for 'pkg' option.")
     opt.add_option('--publish-commit', '--publish_commit', dest='publish_commit', default=False, action='store', help="Specify commit id for 'publish_both' option (Please make sure it's good!)")
-    opt.add_option('--no-mlx', dest='no_mlx', default=(True if march == 'aarch64' else False), action='store', help="don't use mlx5 dpdk driver. use with ./b configure --no-mlx. no need to run build with it")
+    opt.add_option('--no-mlx', dest='no_mlx', default=False, action='store', help="don't use mlx5 dpdk driver. use with ./b configure --no-mlx. no need to run build with it")
     opt.add_option('--with-ntacc', dest='with_ntacc', default=False, action='store_true', help="Use Napatech dpdk driver. Use with ./b configure --with-ntacc.")
     opt.add_option('--no-ver', action = 'store_true', help = "Don't update version file.")
     opt.add_option('--private', dest='private', action = 'store_true', help = "private publish, do not replace latest/be_latest image with this image")
@@ -127,7 +127,7 @@ def options(opt):
     co = opt.option_groups['configure options']
     co.add_option('--sanitized', dest='sanitized', default=False, action='store_true',
                    help='for GCC {0}+ use address sanitizer to catch memory errors'.format(SANITIZE_CC_VERSION))
-    
+
     co.add_option('--gcc6', dest='gcc6', default=False, action='store_true',
                    help='use GCC 6.2 instead of the machine version')
 
@@ -224,12 +224,12 @@ def check_ntapi(ctx):
     ctx.end_msg('Found needed NTAPI library')
     return True
 
-    
+
 def verify_cc_version (env, min_ver = REQUIRED_CC_VERSION):
     ver = StrictVersion('.'.join(env['CC_VERSION']))
 
     return (ver >= min_ver, ver, min_ver)
-    
+
 
 @conf
 def get_ld_search_path(ctx):
@@ -282,9 +282,9 @@ def configure(conf):
     no_mlx          = conf.options.no_mlx
     with_ntacc      = conf.options.with_ntacc
     with_sanitized  = conf.options.sanitized
-    
+
     configure_sanitized(conf, with_sanitized)
-            
+
     conf.env.NO_MLX = no_mlx
     if not no_mlx:
         ofed_ok = conf.check_ofed(mandatory = False)
@@ -306,7 +306,7 @@ def configure(conf):
                                   'https://www.napatech.com/downloads/')
             raise Exception("Cannot find libntapi");
 
-          
+
 
 def configure_gcc (conf, explicit_path = None):
     # use the system path
@@ -324,7 +324,7 @@ def configure_gcc (conf, explicit_path = None):
         conf.load('gcc')
         conf.load('g++')
     finally:
-        conf.environ['PATH'] = saved 
+        conf.environ['PATH'] = saved
 
 
 
@@ -334,7 +334,7 @@ def configure_sanitized (conf, with_sanitized):
     conf.env.SANITIZED = False
 
     # if sanitized is required - check GCC version for sanitizing
-    conf.start_msg('Build sanitized images (GCC >= {0})'.format(SANITIZE_CC_VERSION))    
+    conf.start_msg('Build sanitized images (GCC >= {0})'.format(SANITIZE_CC_VERSION))
 
     # not required
     if not with_sanitized:
@@ -531,14 +531,14 @@ stateless_src = SrcGroup(dir='src/stx/stl/',
                                     'trex_stl_port.cpp',
                                     'trex_stl_streams_compiler.cpp',
                                     'trex_stl_vm_splitter.cpp',
-                                    
+
                                     'trex_stl_dp_core.cpp',
                                     'trex_stl_fs.cpp',
-                                    
+
                                     'trex_stl_messaging.cpp',
-                                    
+
                                     'trex_stl_rpc_cmds.cpp'
-                                    
+
                                     ])
 
 
@@ -936,7 +936,7 @@ bp =SrcGroups([
         stateless_src,
         astf_batch_src,
         astf_src,
-                
+
         version_src,
     ]);
 
@@ -972,7 +972,7 @@ common_flags = ['-DWIN_UCODE_SIM',
 if march == 'x86_64':
     common_flags_new = common_flags + [
                     '-march=native',
-                    '-mssse3', '-msse4.1', '-mpclmul', 
+                    '-mssse3', '-msse4.1', '-mpclmul',
                     '-DRTE_MACHINE_CPUFLAG_SSE',
                     '-DRTE_MACHINE_CPUFLAG_SSE2',
                     '-DRTE_MACHINE_CPUFLAG_SSE3',
@@ -1058,7 +1058,7 @@ dpdk_includes_path =''' ../src/
                         ../src/dpdk/drivers/net/ena/
                         ../src/dpdk/drivers/net/ena/base/
                         ../src/dpdk/drivers/net/ena/base/ena_defs/
-                         
+
                         ../src/dpdk/lib/
                         ../src/dpdk/lib/librte_cfgfile/
                         ../src/dpdk/lib/librte_compat/
@@ -1083,7 +1083,7 @@ dpdk_includes_path =''' ../src/
                         ../src/dpdk/lib/librte_ring/
                         ../src/dpdk/lib/librte_timer/
                         ../src/dpdk/
-                        
+
                         ../src/dpdk/drivers/bus/pci/
                         ../src/dpdk/drivers/bus/vdev/
                         ../src/dpdk/drivers/bus/pci/linux/
@@ -1150,7 +1150,7 @@ class build_option:
       self.mode     = debug_mode;   ##debug,release
       self.platform = march  # aarch64 or x86_64
       self.is_pie = is_pie
-      
+
     def __str__(self):
        s=self.mode+","+self.platform;
        return (s);
@@ -1244,7 +1244,7 @@ class build_option:
     def get_bpfso_target (self):
         return self.update_executable_name("libbpf") + '.so';
 
-     
+
     def get_mlx5_flags(self):
         flags=[]
         if self.isRelease () :
@@ -1303,10 +1303,10 @@ class build_option:
 
         if is_sanitized:
             flags += ['-fsanitize=address', '-fsanitize=leak', '-fno-omit-frame-pointer']
-            
+
         return (flags)
 
-        
+
     def get_c_flags (self, is_sanitized):
         flags = self.get_common_flags()
         if  self.isRelease () :
@@ -1314,18 +1314,18 @@ class build_option:
 
         if is_sanitized:
             flags += ['-fsanitize=address', '-fsanitize=leak', '-fno-omit-frame-pointer']
-            
+
         # for C no special flags yet
         return (flags)
 
-        
+
     def get_link_flags(self, is_sanitized):
         base_flags = ['-rdynamic'];
         if self.is64Platform() and self.isIntelPlatform():
             base_flags += ['-m64']
         base_flags += ['-lrt'];
 
-            
+
         if is_sanitized:
             base_flags += ['-fsanitize=address', '-fsanitize=leak']
         return base_flags;
@@ -1358,7 +1358,7 @@ def build_prog (bld, build_obj):
     cflags    = build_obj.get_c_flags(bld.env.SANITIZED)
     cxxflags  = build_obj.get_cxx_flags(bld.env.SANITIZED)
     linkflags = build_obj.get_link_flags(bld.env.SANITIZED)
-    
+
     bld.objects(
       features='c ',
       includes = dpdk_includes_path,
